@@ -6,16 +6,9 @@
   "author": "Rahmatov Abdullaxon",
   "description": "Keeps Telegram Desktop's colors and chat background in sync with the active Omarchy theme and wallpaper.",
   "license": "MIT",
-  "kinds": ["service", "bar-widget"],
+  "kinds": ["service"],
   "keepLoaded": true,
   "entryPoints": {
-    "service": "Service.qml",
-    "barWidget": "BarWidget.qml"
-  },
-  "barWidget": {
-    "displayName": "Telegram Theme",
-    "description": "Shows Telegram theme-sync status. Click to force an immediate re-sync.",
-    "category": "Status",
-    "allowMultiple": false
+    "service": "Service.qml"
   }
 }

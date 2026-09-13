@@ -16,15 +16,15 @@
 
 set -euo pipefail
 
-# Refuse to run more than one instance at once -- the QML service launches
-# this once per monitor, and without this lock, multiple copies would race
-# to kill/relaunch Telegram at the same time.
+# Refuse to run more than one instance at once -- the QML service can end
+# up spawning more than one across plugin reloads. Blocking on purpose: a
+# second instance just waits quietly for the lock instead of bailing with
+# exit 0 and getting relaunched every 5s forever by the QML restart handler
+# -- and if the active instance ever dies, the waiting one takes over
+# immediately instead of nothing running at all.
 LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-telegram-watch.lock"
 exec 200>"$LOCKFILE"
-if ! flock -n 200; then
-  echo "omarchy-telegram-watch: another instance already holds the lock, exiting" >&2
-  exit 0
-fi
+flock 200
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GEN="$SCRIPT_DIR/omarchy-telegram-theme-gen.sh"
