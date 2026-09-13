@@ -1,0 +1,16 @@
+[Unit]
+Description=Sync Telegram Desktop theme with the active Omarchy theme
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omarchy-telegram-watch.sh
+Restart=on-failure
+RestartSec=2
+# Telegram launches inside this service's cgroup, so `systemctl --user stop`
+# also closes Telegram (restart is fine, it relaunches immediately). To pause
+# the automation without closing Telegram, uncomment the line below:
+# KillMode=process
+
+[Install]
+WantedBy=default.target
