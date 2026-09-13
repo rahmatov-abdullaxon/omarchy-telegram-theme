@@ -50,7 +50,7 @@ restart_telegram() {
 }
 
 apply() {
-  "$GEN" && restart_telegram
+  bash "$GEN" && restart_telegram
 }
 
 apply  # sync once immediately on startup
