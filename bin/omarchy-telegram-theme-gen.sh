@@ -10,6 +10,11 @@
 
 set -euo pipefail
 
+if ! command -v zip >/dev/null 2>&1; then
+  echo "omarchy-telegram: 'zip' not found -- install it (pacman -S zip) and re-run." >&2
+  exit 1
+fi
+
 OUT_DIR="${OMARCHY_TG_OUT_DIR:-$HOME/.local/share/omarchy-telegram}"
 OUT_FILE="$OUT_DIR/omarchy.tdesktop-theme"
 WORK_DIR="$(mktemp -d)"

@@ -16,15 +16,25 @@
 
 set -euo pipefail
 
-for pid in $(pgrep -f "bash .*omarchy-telegram-watch\.sh" 2>/dev/null); do
-  [[ "$pid" == "$$" ]] && continue
-  kill "$pid" 2>/dev/null || true
-done
-sleep 0.2
-
+# Single-instance enforcement via a NON-BLOCKING flock -- not a kill race.
+# The old approach (pgrep for other instances, SIGTERM them, sleep, then
+# blocking-flock) has a TOCTOU gap between the kill and the lock acquisition:
+# if two instances start close together, each one's kill step can fire before
+# the other has reached flock, so they SIGTERM each other back and forth.
+# Every kill shows up to the supervisor as a crash, triggering its own
+# restart -- which spawns yet another instance into the same race. The
+# result is a perpetual crash loop, and because each surviving instance
+# still runs apply() once on startup, Telegram gets regenerated/restarted by
+# whichever racing copy happens to survive a given moment rather than
+# deterministically by the actual theme-change event.
+#
+# Fix: try to take the lock without blocking. Already held -> another
+# instance is genuinely running -> exit clean, touch nothing, no kill.
 LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-telegram-watch.lock"
 exec 200>"$LOCKFILE"
-flock 200
+if ! flock -n 200; then
+  exit 0
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GEN="$SCRIPT_DIR/omarchy-telegram-theme-gen.sh"
