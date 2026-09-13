@@ -16,8 +16,19 @@
 
 set -euo pipefail
 
-# Refuse to run more than one instance at once -- the QML service can end
-# up spawning more than one across plugin reloads. Blocking on purpose: a
+# Sweep away any leftover instances from a previous shell/plugin reload.
+# `omarchy restart shell` (and plugin update/enable cycles) do not appear
+# to clean up this script's already-running children -- confirmed via
+# `lslocks` showing 19+ orphaned, permanently-blocked instances piling up
+# across a single debugging session. Rather than depend on the host's
+# lifecycle behavior, each new instance kills any older siblings itself.
+for pid in $(pgrep -f "bash .*omarchy-telegram-watch\.sh" 2>/dev/null); do
+  [[ "$pid" == "$$" ]] && continue
+  kill "$pid" 2>/dev/null || true
+done
+sleep 0.2
+
+# Refuse to run more than one instance at once. Blocking on purpose: a
 # second instance just waits quietly for the lock instead of bailing with
 # exit 0 and getting relaunched every 5s forever by the QML restart handler
 # -- and if the active instance ever dies, the waiting one takes over
