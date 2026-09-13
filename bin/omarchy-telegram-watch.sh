@@ -16,6 +16,16 @@
 
 set -euo pipefail
 
+# Refuse to run more than one instance at once -- the QML service launches
+# this once per monitor, and without this lock, multiple copies would race
+# to kill/relaunch Telegram at the same time.
+LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-telegram-watch.lock"
+exec 200>"$LOCKFILE"
+if ! flock -n 200; then
+  echo "omarchy-telegram-watch: another instance already holds the lock, exiting" >&2
+  exit 0
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GEN="$SCRIPT_DIR/omarchy-telegram-theme-gen.sh"
 
@@ -36,8 +46,6 @@ if ! command -v inotifywait >/dev/null 2>&1; then
 fi
 
 restart_telegram() {
-  # Only restart if Telegram is actually running; otherwise it'll just pick
-  # up the fresh theme file on its next normal launch.
   if pgrep -x telegram-desktop >/dev/null 2>&1; then
     pkill -x telegram-desktop || true
     sleep 0.3
@@ -53,11 +61,8 @@ apply() {
   bash "$GEN" && restart_telegram
 }
 
-apply  # sync once immediately on startup
+apply
 
-# Debounced watch loop: omarchy-theme-set touches several files in a row
-# (theme symlink, then background symlink via omarchy-theme-bg-next), so we
-# coalesce bursts into a single regenerate+restart instead of firing twice.
 inotifywait -m -e create,delete,modify,moved_to,attrib "${WATCH_DIRS[@]}" 2>/dev/null |
 while read -r _; do
   sleep 0.4
