@@ -10,8 +10,9 @@ Item {
 
     readonly property string pluginId: manifest && manifest.id
         ? String(manifest.id) : "telegram-theme"
-    readonly property string sourceDir: manifest && manifest.__sourceDir
-        ? String(manifest.__sourceDir) : ""
+    readonly property string homeDir: Quickshell.env("HOME")
+    readonly property string sourceDir: (pluginId && homeDir)
+        ? homeDir + "/.config/omarchy/plugins/" + pluginId : ""
     readonly property string watchScript: sourceDir
         ? sourceDir + "/bin/omarchy-telegram-watch.sh" : ""
     readonly property string genScript: sourceDir
@@ -19,7 +20,7 @@ Item {
 
     function resync() {
         if (!genScript) {
-            console.warn("omarchy-telegram-theme: manifest.__sourceDir unavailable, cannot resync")
+            console.warn("omarchy-telegram-theme: sourceDir unavailable, cannot resync")
             return
         }
         resyncProcess.command = ["bash", root.genScript]
@@ -65,29 +66,12 @@ Item {
         }
     }
 
+    onSourceDirChanged: {
+        if (sourceDir)
+            console.warn("omarchy-telegram-theme: resolved sourceDir =", sourceDir)
+    }
+
     Component.onCompleted: {
-        if (!sourceDir) {
-            console.warn("omarchy-telegram-theme: manifest.__sourceDir was not provided, "
-                + "cannot locate bundled bin/ scripts")
-        }
-        console.warn("omarchy-telegram-theme DIAG: onCompleted manifest =",
-            JSON.stringify(manifest))
-    }
-
-    onManifestChanged: {
-        console.warn("omarchy-telegram-theme DIAG: manifest changed, keys =",
-            manifest ? JSON.stringify(Object.keys(manifest)) : "null",
-            "full =", JSON.stringify(manifest))
-    }
-
-    Timer {
-        interval: 3000
-        running: true
-        repeat: false
-        onTriggered: {
-            console.warn("omarchy-telegram-theme DIAG: 3s later, manifest =",
-                JSON.stringify(root.manifest),
-                "sourceDir =", root.sourceDir)
-        }
+        console.warn("omarchy-telegram-theme: onCompleted, sourceDir currently =", sourceDir)
     }
 }
