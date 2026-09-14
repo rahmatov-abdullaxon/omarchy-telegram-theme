@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.rahmatov-abdullaxon.telegram-theme",
   "name": "Telegram Theme Sync",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "Rahmatov Abdullaxon",
   "description": "Keeps Telegram Desktop's colors and chat background in sync with the active Omarchy theme and wallpaper.",
   "license": "MIT",

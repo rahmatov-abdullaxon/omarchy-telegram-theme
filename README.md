@@ -60,15 +60,9 @@ Listed up front rather than left for a reviewer to find:
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/rahmatov-abdullaxon/omarchy-telegram-theme --review --enable
+omarchy plugin add https://github.com/rahmatov-abdullaxon/omarchy-telegram-theme --enable
 ```
 
-Or via a source alias first:
-```bash
-omarchy plugin source add https://github.com/rahmatov-abdullaxon/omarchy-telegram-theme --as tg
-omarchy plugin available
-omarchy plugin add tg.telegram-theme --from tg --review --enable
-```
 
 **One-time step inside Telegram:** Settings → Chat Settings → Chat background
 → **Choose from file** → select
