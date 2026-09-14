@@ -1,5 +1,7 @@
 # omarchy-telegram-theme
 
+![omarchy-telegram-theme preview](preview.png)
+
 Keeps Telegram Desktop's colors and chat background in sync with your active
 Omarchy theme and wallpaper — automatically, on every theme switch and every
 wallpaper cycle.
