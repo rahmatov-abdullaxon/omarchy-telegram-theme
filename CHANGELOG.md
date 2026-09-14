@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.0
+
+- **Removed:** the manual hook / `install.sh` / `uninstall.sh` / systemd-unit
+  tier entirely. The native Omarchy plugin (this repo's actual submission
+  target) is the only supported install path now — it's the one that's
+  been tested live, and shipping two independent ways to do the same job
+  was a needless second surface (they'd race each other if both were ever
+  installed at once).
+- **Hardened:** the watcher's lock file no longer falls back to a bare
+  `/tmp/omarchy-telegram-watch.lock` if `XDG_RUNTIME_DIR` is unset. That's
+  a predictable, shared path — on a multi-user machine, another local user
+  could pre-create it (e.g. as a symlink) before this script ever runs.
+  Falls back to a UID-namespaced directory created with mode 700 instead.
+
 ## 1.1.0
 
 - **Fixed:** the watcher's single-instance guard was a kill race, not a real
