@@ -63,7 +63,6 @@ Listed up front rather than left for a reviewer to find:
 omarchy plugin add https://github.com/rahmatov-abdullaxon/omarchy-telegram-theme --enable
 ```
 
-
 **One-time step inside Telegram:** Settings → Chat Settings → Chat background
 → **Choose from file** → select
 `~/.local/share/omarchy-telegram/omarchy.tdesktop-theme`, then **Apply This
