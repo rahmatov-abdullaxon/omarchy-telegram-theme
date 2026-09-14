@@ -77,7 +77,7 @@ apply() {
 
 apply
 
-inotifywait -m -e create,delete,modify,moved_to,attrib "${WATCH_DIRS[@]}" 2>/dev/null |
+inotifywait -m -e create,delete,modify,moved_to,attrib "${WATCH_DIRS[@]}" 200>&- 2>/dev/null |
 while read -r _; do
   sleep 0.4
   while read -r -t 0.1 _; do :; done
