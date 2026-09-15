@@ -82,7 +82,8 @@ omarchy-shell io.github.rahmatov-abdullaxon.telegram-theme resync
 **Status of the QML, honestly:** the process-supervision and restart-retry
 logic (`Service.qml` relaunching the watcher after it exits) has been
 confirmed live against a real running Omarchy session, including recovering
-correctly from a real crash-loop bug — see CHANGELOG.md. The
+correctly from a real crash-loop bug (see git log for the design
+iterations that led here). The
 `omarchy-shell <id> resync` IPC path above has **not** been confirmed the
 same way: its `IpcHandler` target binds to a value computed from the
 async-loaded plugin manifest, and nothing here has verified that binding is
@@ -122,8 +123,8 @@ theme under Settings → Chat Settings.
 - **A kill-based single-instance guard is a race, not a fix.** The watcher
   went through three real design iterations before landing on a
   non-blocking `flock` with no killing at all. Full story, and why it's
-  non-blocking rather than blocking, in CHANGELOG.md — read that before
-  touching the lock logic again.
+  non-blocking rather than blocking, is in the git log around the
+  lock-rewrite commits — read that before touching the lock logic again.
 - **A predictable `/tmp` lock path is a symlink-attack surface on shared
   machines.** The lock now lives under `XDG_RUNTIME_DIR` (per-user, mode
   0700), falling back to a UID-namespaced directory rather than a bare
