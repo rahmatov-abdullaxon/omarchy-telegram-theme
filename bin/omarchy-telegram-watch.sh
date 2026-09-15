@@ -30,7 +30,14 @@ set -euo pipefail
 #
 # Fix: try to take the lock without blocking. Already held -> another
 # instance is genuinely running -> exit clean, touch nothing, no kill.
-LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-telegram-watch.lock"
+if [[ -n "${XDG_RUNTIME_DIR:-}" && -d "$XDG_RUNTIME_DIR" ]]; then
+  LOCKDIR="$XDG_RUNTIME_DIR"
+else
+  LOCKDIR="/tmp/omarchy-telegram-$(id -u)"
+  mkdir -p "$LOCKDIR"
+  chmod 700 "$LOCKDIR"
+fi
+LOCKFILE="$LOCKDIR/omarchy-telegram-watch.lock"
 exec 200>"$LOCKFILE"
 if ! flock -n 200; then
   exit 0
