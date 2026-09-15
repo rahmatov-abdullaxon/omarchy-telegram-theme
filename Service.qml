@@ -7,6 +7,8 @@ Item {
 
     property var shell: null
     property var manifest: null
+    property int restartAttempts: 0
+    readonly property int maxRestartAttempts: 5
 
     readonly property string pluginId: manifest && manifest.id
         ? String(manifest.id) : "telegram-theme"
@@ -43,8 +45,19 @@ Item {
         command: root.watchScript ? ["bash", root.watchScript] : []
         running: root.watchScript !== ""
         onExited: function (exitCode) {
-            console.warn("omarchy-telegram-theme: watcher exited (code "
-                + exitCode + "), restarting in 5s")
+            if (exitCode === 1) {
+                console.warn("omarchy-telegram-theme: fatal setup error (code 1) — "
+                    + "check inotify-tools/zip are installed and Omarchy theme paths exist. Not restarting.")
+                return
+            }
+            if (root.restartAttempts >= root.maxRestartAttempts) {
+                console.warn("omarchy-telegram-theme: watcher failed "
+                    + root.maxRestartAttempts + "x, giving up.")
+                return
+            }
+            root.restartAttempts++
+            console.warn("omarchy-telegram-theme: watcher exited (code " + exitCode
+                + "), restart " + root.restartAttempts + "/" + root.maxRestartAttempts + " in 5s")
             restartTimer.restart()
         }
     }
