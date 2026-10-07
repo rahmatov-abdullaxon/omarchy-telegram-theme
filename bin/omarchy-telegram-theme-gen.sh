@@ -172,17 +172,27 @@ GREEN="$(toml_get green)"; [[ -z "$GREEN" ]] && GREEN="$(toml_get color2)"
 # leaves everything else at Telegram's own default, rather than guessing at
 # the full ~300-constant set.
 # ---------------------------------------------------------------------------
+# --- derived colors (tints of the theme's own accent, so it stays on-palette) ---
+if [[ "$IS_LIGHT" -eq 1 ]]; then T_ACT=14; T_OUT=16; T_SEL=26; else T_ACT=20; T_OUT=32; T_SEL=42; fi
+ACTIVE_BG="$(mix "$BG" "$ACCENT" "$T_ACT")"  # selected chat row
+OUT_BG="$(mix "$BG" "$ACCENT" "$T_OUT")"     # outgoing bubble
+OUT_BG_SEL="$(mix "$BG" "$ACCENT" "$T_SEL")" # outgoing bubble, selected
+OUT_TEXT="$(contrast_of "$OUT_BG")"
+OUT_SUB="$(mix "$OUT_TEXT" "$OUT_BG" 35)"    # dates/secondary text in outgoing bubble
+RIPPLE="$(mix "$SURFACE2" "$FG" 12)"
+BTN_RIPPLE="$(mix "$ACCENT" "$ACCENT_TEXT" 20)"
+
 PALETTE="$WORK_DIR/colors.tdesktop-theme"
 cat > "$PALETTE" <<EOF
 windowBg: ${BG};
 windowBgOver: ${SURFACE};
-windowBgActive: ${SURFACE2};
-windowBgRipple: ${SURFACE2};
+windowBgActive: ${ACTIVE_BG};
+windowBgRipple: ${RIPPLE};
 windowFg: ${FG};
 windowFgActive: ${FG};
 windowFgOver: ${FG};
 windowBoldFg: ${FG};
-windowBoldFgOver: ${ACCENT};
+windowBoldFgOver: ${FG};
 windowSubTextFg: ${MUTED};
 windowSubTextFgOver: ${MUTED};
 windowActiveTextFg: ${ACCENT};
@@ -200,11 +210,11 @@ titleButtonFgOver: ${FG};
 titleButtonCloseBg: ${DEEP_BG};
 titleButtonCloseBgOver: ${RED};
 titleButtonCloseFg: ${MUTED};
-titleButtonCloseFgOver: ${FG};
+titleButtonCloseFgOver: ${ACCENT_TEXT};
 
 dialogsBg: ${BG};
 dialogsBgOver: ${SURFACE};
-dialogsBgActive: ${SURFACE2};
+dialogsBgActive: ${ACTIVE_BG};
 dialogsNameFg: ${FG};
 dialogsNameFgActive: ${FG};
 dialogsNameFgOver: ${FG};
@@ -234,25 +244,25 @@ dialogsForwardBg: ${SURFACE2};
 dialogsForwardFg: ${FG};
 
 historyTextInFg: ${FG};
-historyTextOutFg: ${SEL_TEXT};
+historyTextOutFg: ${OUT_TEXT};
 msgInBg: ${SURFACE};
 msgInBgSelected: ${SURFACE2};
-msgOutBg: ${SELECTION};
-msgOutBgSelected: ${SURFACE2};
+msgOutBg: ${OUT_BG};
+msgOutBgSelected: ${OUT_BG_SEL};
 msgInServiceFg: ${ACCENT};
-msgOutServiceFg: ${SEL_TEXT};
+msgOutServiceFg: ${OUT_TEXT};
 msgInDateFg: ${MUTED};
-msgOutDateFg: ${SEL_TEXT};
+msgOutDateFg: ${OUT_SUB};
 msgInReplyBarColor: ${ACCENT};
-msgOutReplyBarColor: ${SEL_TEXT};
+msgOutReplyBarColor: ${OUT_TEXT};
 msgInMonoFg: ${ACCENT};
-msgOutMonoFg: ${SEL_TEXT};
-msgServiceBg: ${SURFACE2};
-msgServiceFg: ${MUTED};
+msgOutMonoFg: ${OUT_TEXT};
+msgServiceBg: ${BG}B3;
+msgServiceFg: ${FG};
 msgSelectOverlay: ${ACCENT}33;
 msgStickerOverlay: ${BG}66;
 layerBg: ${BG}CC;
-mediaviewBg: ${BG}F2;
+mediaviewBg: ${DEEPER_BG}F2;
 mediaviewTextLinkFg: ${ACCENT};
 
 historyComposeAreaBg: ${SURFACE};
@@ -269,7 +279,7 @@ activeLineFgError: ${RED};
 
 activeButtonBg: ${ACCENT};
 activeButtonBgOver: ${ACCENT};
-activeButtonBgRipple: ${SELECTION};
+activeButtonBgRipple: ${BTN_RIPPLE};
 activeButtonFg: ${ACCENT_TEXT};
 activeButtonFgOver: ${ACCENT_TEXT};
 lightButtonBg: ${SURFACE2};
@@ -288,12 +298,12 @@ menuBg: ${SURFACE};
 menuBgOver: ${SURFACE2};
 menuIconFg: ${MUTED};
 menuIconFgOver: ${FG};
-scrollBg: ${SURFACE};
-scrollBgOver: ${SURFACE2};
-scrollBarBg: ${MUTED};
-scrollBarBgOver: ${FG};
+scrollBg: ${MUTED}1A;
+scrollBgOver: ${MUTED}33;
+scrollBarBg: ${MUTED}80;
+scrollBarBgOver: ${MUTED}B3;
 
-topBarBg: ${BG};
+topBarBg: ${SURFACE};
 tooltipBg: ${SURFACE2};
 tooltipFg: ${FG};
 tooltipBorderFg: ${SURFACE2};
