@@ -40,7 +40,7 @@ fi
 LOCKFILE="$LOCKDIR/omarchy-telegram-watch.lock"
 exec 200>"$LOCKFILE"
 if ! flock -n 200; then
-  exit 0
+  exit 3
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -84,9 +84,20 @@ apply() {
 
 apply
 
-inotifywait -m -e create,delete,modify,moved_to,attrib "${WATCH_DIRS[@]}" 200>&- 2>/dev/null |
+PDS=()
+if command -v setpriv >/dev/null 2>&1; then
+  PDS=(setpriv --pdeathsig KILL)
+fi
+
+cleanup() { pkill -P $$ 2>/dev/null || true; }
+trap 'cleanup; exit 0' TERM INT HUP
+trap cleanup EXIT
+
+# pdeathsig KILL: inotifywait is killed by the kernel if this script dies
+"${PDS[@]}" inotifywait -m -e create,delete,modify,moved_to,attrib "${WATCH_DIRS[@]}" 200>&- 2>/dev/null |
 while read -r _; do
   sleep 0.4
   while read -r -t 0.1 _; do :; done
   apply
-done
+done &
+wait $!

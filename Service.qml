@@ -43,8 +43,13 @@ Item {
     Process {
         id: watcherProcess
         command: root.watchScript ? ["bash", root.watchScript] : []
-        running: root.watchScript !== ""
+        running: root.manifest !== null && root.watchScript !== ""
         onExited: function (exitCode) {
+            if (exitCode === 3) {
+                // Another watcher already holds the lock: not a crash, keep retries intact
+                console.warn("omarchy-telegram-theme: a watcher is already running, not starting another")
+                return
+            }
             if (exitCode === 1) {
                 console.warn("omarchy-telegram-theme: fatal setup error (code 1) — "
                     + "check inotify-tools/zip are installed and Omarchy theme paths exist. Not restarting.")
@@ -60,6 +65,13 @@ Item {
                 + "), restart " + root.restartAttempts + "/" + root.maxRestartAttempts + " in 5s")
             restartTimer.restart()
         }
+    }
+
+    // Healthy for 30s: forgive earlier failures
+    Timer {
+        interval: 30000
+        running: watcherProcess.running
+        onTriggered: root.restartAttempts = 0
     }
 
     Timer {
